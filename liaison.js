@@ -12,7 +12,6 @@ const commands = {
 	add:modules.QUEUE,
 	open:modules.QUEUE,
 	close:modules.QUEUE,
-	testq:modules.QUEUE,
 
 	test:modules.INFO,
 	me:modules.INFO,

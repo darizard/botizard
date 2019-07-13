@@ -34,7 +34,6 @@ module.exports.executeCommand = async function(target, context, words) {
 		} else { //Level queue is not open
 			return "The queue is currently closed";
 		}
-		//sendMessage(target, context, "Level code " + words[1] + " added to the queue.");
 	}
 
 	if(words[0].toLowerCase() === "!open" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
@@ -50,17 +49,6 @@ module.exports.executeCommand = async function(target, context, words) {
 			return "The level queue has been closed";
 		}
 	}
-
-	/*if(words[0].toLowerCase() === "!testq") {
-		console.log("testq rcvd");
-		db.query('SELECT * FROM levels', (error, results, fields) => {
-			if(error) {
-				console.error('An error occurred while executing the query');
-				throw error;
-			}
-			console.log(results[0].ID);
-		});
-	}*/
 }
 
 async function codeExists(code) {

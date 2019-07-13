@@ -19,11 +19,9 @@ client.on('disconnected', onDisconnectedHandler);
 // Connect to Twitch:
 client.connect();
 
-//test.runTest("#darizard",test.broadcasterContext,"!me", client);
-
 async function onMessageHandler (target, context, msg, self){
 	if(self) { return } // Ignore messages from the bot
-	if(msg[0] != "!") { return } // Be a nice dude and don't parse messages not for the bot.
+	if(msg[0] != "!") { return } // Ignore messages not beginning with '!'
 
 	var words = msg.split(/[ ,]+/);
 	var output = "";
