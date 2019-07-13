@@ -1,0 +1,2 @@
+# botizard
+Twitch Chat Bot
