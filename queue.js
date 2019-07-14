@@ -5,12 +5,12 @@ const Level = require('./level');
 const levelCodeRegex = new RegExp('^[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}$');
 const invalidLettersRegex = new RegExp('[iIoOzZ]');
 
-var isOpen = false;
+var queueIsOpen = false;
 
 module.exports.executeCommand = async function(target, context, words) {
 
 	if(words[0].toLowerCase() === "!add") {
-		if(isOpen) {
+		if(queueIsOpen) {
 			//var levelCodeRegexCombined = new RegExp('^[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}$');
 			var formatCorrect = levelCodeRegex.test(words[1]);
 			var invalidLetter = invalidLettersRegex.test(words[1]);
@@ -21,7 +21,7 @@ module.exports.executeCommand = async function(target, context, words) {
 			
 			//if level code already exists, return message
 			if(await codeExists(words[1])) {
-				return `${words[1]} was already submitted.`;	
+				return `${words[1]} was already submitted.`;
 			} else {
 				//add submitter if necessary, then add level
 				if(!await submitterExists(context.username)) {
@@ -37,17 +37,22 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!open" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		 if(!isOpen) {
-		 	isOpen = true;
+		 if(!queueIsOpen) {
+		 	queueIsOpen = true;
 		 	return "The level queue has been opened";
 		 }
 	}
 
 	if(words[0].toLowerCase() === "!close" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(isOpen) {
-			isOpen = false;
+		if(queueIsOpen) {
+			queueIsOpen = false;
 			return "The level queue has been closed";
 		}
+	}
+
+	if(words[0].toLowerCase() === "!position") {
+		result = await activeQueuePosition(context.username);
+		return `${result.name} is in position ${result.position} with level ${result.code}`;
 	}
 }
 
@@ -83,7 +88,7 @@ async function submitterExists(submitter) {
 
 async function addSubmitter(submitter) {
 	try {
-		const result = await db.query(`INSERT INTO submitters (name) VALUES ("${submitter}")`);
+		const result = await db.query(`INSERT INTO submitters (name) VALUES (?)`, [submitter]);
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
@@ -93,7 +98,8 @@ async function addLevel(code, submitter) {
 	var submitter_id = await getSubmitterID(submitter);
 	try {
 		//implement more rows into insert when bookmarks site available
-		const result = await db.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES ("${code}",${submitter_id},1,1)`);
+		const result = await db.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES (?,?,1,1)`,
+									  [code, submitter_id]);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
@@ -105,7 +111,60 @@ async function getSubmitterID(submitter) {
 		if(result[0].id != null ) {
 			return result[0].id;
 		}
+		else {
+			return -1;
+		}
 	} catch (err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function numSubmittedBy(submitter, queueType) {
+	try {
+		const result = await db.query(`SELECT 
+											COUNT(submitter_id) AS count
+									   FROM 
+									    	levels 
+									   INNER JOIN 
+									   		submitters 
+									   ON
+									   		levels.submitter_id = submitters.id 
+									   WHERE 
+									   		submitters.name = ? AND
+									    	levels.queue_type = ?`,
+									   [submitter, queueType]);
+		return result[0].count;
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function activeQueuePosition(submitter) {
+	try {
+		var result = await db.query(`
+			WITH activeQueue AS
+				(SELECT 
+					ROW_NUMBER() OVER (ORDER BY timestamp ASC, id ASC) position,
+					code,
+					submitter_id,
+					timestamp
+				FROM
+					levels
+				WHERE
+					queue_type = 1)
+			SELECT
+				activeQueue.position,
+				activeQueue.code,
+				submitters.name
+			FROM
+				activeQueue,
+				submitters
+			WHERE
+				activeQueue.submitter_id = submitters.id AND
+				submitters.name = ?`,
+			[submitter]);
+		return result[0];
+	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
 }

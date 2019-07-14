@@ -12,7 +12,18 @@ const commands = {
 	add:modules.QUEUE,
 	open:modules.QUEUE,
 	close:modules.QUEUE,
-
+	position:modules.QUEUE,
+	/*
+	skip:modules.QUEUE,
+	next:modules.QUEUE,
+	random:modules.QUEUE,
+	save:modules.QUEUE,
+	challenge:modules.QUEUE,
+	wronglevel:modules.QUEUE,
+	putback:modules.QUEUE,
+	replace:modules.QUEUE,
+	list:modules.QUEUE,
+	*/
 	test:modules.INFO,
 	me:modules.INFO,
 	badges:modules.INFO
