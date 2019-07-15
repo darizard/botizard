@@ -70,13 +70,46 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!completed" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(await completeLevel(currentLevel.id)) {
+		if(await reclassLevel(currentLevel.id, 4)) {
 			var output = `Level ${currentLevel.code} completed!`;
 			currentLevel = null;
 			return output;
 		}
 		else {
 			console.error("!completed command did not execute successfully");
+		}
+	}
+
+	if(words[0].toLowerCase() === "!skip" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(await reclassLevel(currentLevel.id, 2)) {
+			var output = `Level ${currentLevel.code} skipped!`;
+			currentLevel = null;
+			return output;
+		}
+		else {
+			console.error("!skip command did not execute successfully");
+		}
+	}
+
+	if(words[0].toLowerCase() === "!save" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(await reclassLevel(currentLevel.id, 3)) {
+			var output = `Level ${currentLevel.code} saved!`;
+			currentLevel = null;
+			return output;
+		}
+		else {
+			console.error("!save command did not execute successfully");
+		}
+	}
+
+	if(words[0].toLowerCase() === "!meme" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(await reclassLevel(currentLevel.id, 5)) {
+			var output = `Level ${currentLevel.code} memed!`;
+			currentLevel = null;
+			return output;
+		}
+		else {
+			console.error("!meme command did not execute successfully");
 		}
 	}
 }
@@ -275,9 +308,9 @@ async function randomLevel() {
 	}
 }
 
-async function completeLevel(id) {
+async function reclassLevel(id, queueType) {
 	try {
-		const result = await db.query(`UPDATE levels SET queue_type = 4 WHERE id = ?`, [id]);
+		const result = await db.query(`UPDATE levels SET queue_type = ? WHERE id = ?`, [queueType,id]);
 		return result.affectedRows == 1
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
