@@ -13,10 +13,11 @@ const commands = {
 	open:modules.QUEUE,
 	close:modules.QUEUE,
 	position:modules.QUEUE,
-	/*
-	skip:modules.QUEUE,
 	next:modules.QUEUE,
 	random:modules.QUEUE,
+	/*
+	completed:modules.QUEUE
+	skip:modules.QUEUE,
 	save:modules.QUEUE,
 	challenge:modules.QUEUE,
 	wronglevel:modules.QUEUE,

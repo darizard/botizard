@@ -6,6 +6,7 @@ const levelCodeRegex = new RegExp('^[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}
 const invalidLettersRegex = new RegExp('[iIoOzZ]');
 
 var queueIsOpen = false;
+var currentLevel = null;
 
 module.exports.executeCommand = async function(target, context, words) {
 
@@ -22,11 +23,8 @@ module.exports.executeCommand = async function(target, context, words) {
 			//if level code already exists, return message
 			if(await codeExists(words[1])) {
 				return `${words[1]} was already submitted.`;
-			} else {
-				//add submitter if necessary, then add level
-				if(!await submitterExists(context.username)) {
-					await addSubmitter(context.username);
-				}
+			} else { //add submitter (if necessary) then add level
+				await addSubmitter(context.username);
 				await addLevel(words[1], context.username);
 			}
 			//Implement when bookmarks site available: check whether level creator exists, and add to DB if it doesn't
@@ -53,6 +51,33 @@ module.exports.executeCommand = async function(target, context, words) {
 	if(words[0].toLowerCase() === "!position") {
 		result = await activeQueuePosition(context.username);
 		return `${result.name} is in position ${result.position} with level ${result.code}`;
+	}
+
+	if(words[0].toLowerCase() === "!next" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel != null) {
+			return `Resolve the current level (${currentLevel.code}) first!`;
+		}
+		currentLevel = new Level(await nextLevel());
+		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
+	}
+
+	if(words[0].toLowerCase() === "!random" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel != null) {
+			return `Resolve the current level (${curentLevel.code} first!`;
+		}
+		currentLevel = new Level(await randomLevel());
+		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
+	}
+
+	if(words[0].toLowerCase() === "!completed" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(await completeLevel(currentLevel.id)) {
+			var output = `Level ${currentLevel.code} completed!`;
+			currentLevel = null;
+			return output;
+		}
+		else {
+			console.error("!completed command did not execute successfully");
+		}
 	}
 }
 
@@ -86,12 +111,22 @@ async function submitterExists(submitter) {
 	return rtnval;
 }
 
+/*
+Adds a new record to the submitters table.
+Returns true if the INSERT query was successful.
+Returns false if a database error occurred during the INSERT query, and logs an error message 
+	to the console if the error was anything but a duplicate entry error
+*/
 async function addSubmitter(submitter) {
 	try {
 		const result = await db.query(`INSERT INTO submitters (name) VALUES (?)`, [submitter]);
 	} catch(err) {
-		console.error("An error occurred while querying the DB: " + err);
+		if(err.code != "ER_DUP_ENTRY") {
+			console.error("An error occurred while querying the DB: " + err);
+		}
+		return false;
 	}
+	return true;
 }
 
 async function addLevel(code, submitter) {
@@ -165,6 +200,86 @@ async function activeQueuePosition(submitter) {
 			[submitter]);
 		return result[0];
 	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function nextLevel() {
+	try {
+		var result = await db.query(`
+			WITH activeQueue AS
+				(SELECT 
+					ROW_NUMBER() OVER (ORDER BY timestamp ASC, id ASC) position,
+					id,
+					code,
+					submitter_id,
+					timestamp
+				FROM
+					levels
+				WHERE
+					queue_type = 1)
+			SELECT
+				activeQueue.id,
+				activeQueue.code,
+				submitters.name as submitter
+			FROM
+				activeQueue,
+				submitters
+			WHERE
+				activeQueue.submitter_id = submitters.id AND
+				activeQueue.position = 1`);
+		return result[0];
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function randomLevel() {
+	try {
+		var result = await db.query(`
+			SELECT
+				COUNT(*) AS count 
+			FROM
+				levels
+			WHERE
+				queue_type = 1`);
+		var count = result[0].count;
+		console.log("count value: " + count);
+		var random = Math.floor(Math.random() * count + 1);
+		console.log("random value chosen: " + random);
+		result = await db.query(`
+			WITH activeQueue AS
+				(SELECT 
+					ROW_NUMBER() OVER () position,
+					id,
+					code,
+					submitter_id
+				FROM
+					levels
+				WHERE
+					queue_type = 1)
+			SELECT
+				activeQueue.id,
+				activeQueue.code,
+				submitters.name as submitter
+			FROM
+				activeQueue,
+				submitters
+			WHERE
+				activeQueue.submitter_id = submitters.id AND
+				activeQueue.position = ?`,
+			[random]);
+		return result[0];
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function completeLevel(id) {
+	try {
+		const result = await db.query(`UPDATE levels SET queue_type = 4 WHERE id = ?`, [id]);
+		return result.affectedRows == 1
+	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
 }
