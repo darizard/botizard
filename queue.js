@@ -57,8 +57,16 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(currentLevel != null) {
 			return `Resolve the current level (${currentLevel.code}) first!`;
 		}
-		currentLevel = new Level(await nextLevel());
+		currentLevel = new Level(await nextLevel(1));
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
+	}
+
+	if(words[0].toLowerCase() === "!challenge" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel != null) {
+			return `Resolve the current level ${currentLevel.code} first!`;
+		}
+		currentLevel = new Level(await nextLevel(3));
+		return `Now challenging ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
 	if(words[0].toLowerCase() === "!random" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
@@ -237,7 +245,7 @@ async function activeQueuePosition(submitter) {
 	}
 }
 
-async function nextLevel() {
+async function nextLevel(queueType) {
 	try {
 		var result = await db.query(`
 			WITH activeQueue AS
@@ -250,7 +258,7 @@ async function nextLevel() {
 				FROM
 					levels
 				WHERE
-					queue_type = 1)
+					queue_type = ?)
 			SELECT
 				activeQueue.id,
 				activeQueue.code,
@@ -260,7 +268,8 @@ async function nextLevel() {
 				submitters
 			WHERE
 				activeQueue.submitter_id = submitters.id AND
-				activeQueue.position = 1`);
+				activeQueue.position = 1`,
+				[queueType]);
 		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
