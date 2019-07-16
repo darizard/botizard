@@ -23,10 +23,15 @@ module.exports.executeCommand = async function(target, context, words) {
 			//if level code already exists, return message
 			if(await codeExists(words[1])) {
 				return `${words[1]} was already submitted.`;
-			} else { //add submitter (if necessary) then add level
-				await addSubmitter(context.username);
-				await addLevel(words[1], context.username);
+			} 
+			if(await numSubmittedBy(context.username,1) > 0) {
+				return `${context.username} , you already have a level in the queue!`;
 			}
+			
+			//add submitter (if necessary) then add level
+			await addSubmitter(context.username);
+			await addLevel(words[1], context.username);
+			
 			//Implement when bookmarks site available: check whether level creator exists, and add to DB if it doesn't
 			return `Level ${words[1]} has been submitted by ${context.username} !`;
 		} else { //Level queue is not open
@@ -50,6 +55,9 @@ module.exports.executeCommand = async function(target, context, words) {
 
 	if(words[0].toLowerCase() === "!position") {
 		result = await activeQueuePosition(context.username);
+		if(result == null) {
+			return `${context.username} currently has no level in the queue`;
+		}
 		return `${result.name} is in position ${result.position} with level ${result.code}`;
 	}
 
@@ -57,7 +65,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(currentLevel != null) {
 			return `Resolve the current level (${currentLevel.code}) first!`;
 		}
-		currentLevel = new Level(await nextLevel(1));
+		var output = await nextLevel(1);
+		if(output == null) {
+			return `No more levels in queue!`;
+		}
+		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
@@ -65,7 +77,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(currentLevel != null) {
 			return `Resolve the current level ${currentLevel.code} first!`;
 		}
-		currentLevel = new Level(await nextLevel(3));
+		var output = await nextLevel(3);
+		if(output == null) {
+			return `No saved levels!`;
+		}
+		currentLevel = new Level(output);
 		return `Now challenging ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
@@ -73,7 +89,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(currentLevel != null) {
 			return `Resolve the current level (${curentLevel.code} first!`;
 		}
-		currentLevel = new Level(await randomLevel());
+		var output = await randomLevel();
+		if(output == null) {
+			return `No more levels in queue!`;
+		}
+		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
