@@ -1,12 +1,16 @@
-var db = require('./db');
 const verifier = require('./verifier');
 const Level = require('./level');
+var db;
 
 const levelCodeRegex = new RegExp('^[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}$');
 const invalidLettersRegex = new RegExp('[iIoOzZ]');
 
 var queueIsOpen = false;
 var currentLevel = null;
+
+module.exports.connect = async function(db_name) {
+	db = require(`./${db_name}`);
+}
 
 module.exports.executeCommand = async function(target, context, words) {
 

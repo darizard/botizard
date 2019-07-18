@@ -18,6 +18,7 @@ client.on('disconnected', onDisconnectedHandler);
 
 // Connect to Twitch:
 client.connect();
+queue.connect("db");
 
 async function onMessageHandler (target, context, msg, self){
 	if(self) { return } // Ignore messages from the bot
