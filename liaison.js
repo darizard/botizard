@@ -20,10 +20,10 @@ const commands = {
 	save:modules.QUEUE,
 	meme:modules.QUEUE,
 	challenge:modules.QUEUE,
+	replace:modules.QUEUE,
 	/*
 	wronglevel:modules.QUEUE,
 	putback:modules.QUEUE,
-	replace:modules.QUEUE,
 	list:modules.QUEUE,
 	*/
 	test:modules.INFO,

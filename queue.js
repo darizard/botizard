@@ -43,6 +43,28 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	if(words[0].toLowerCase() === "!replace") {
+		var formatCorrect = levelCodeRegex.test(words[1]);
+		var invalidLetter = invalidLettersRegex.test(words[1]);
+
+		//check format, return message if invalid
+		if(!formatCorrect) return "Level code format invalid";
+		if(invalidLetter) return "Level codes cannot contain the letters i, o, or z";
+
+		var result = await levelSubmittedBy(context.username);
+		var oldCode;
+
+		if(result == null) return `Nothing in queue to replace!`;
+		
+		oldCode = result.code;
+		if(oldCode == words[1])	return `Level ${words[1]} is already in the queue!`;
+
+		result = await replaceLevel(result.code, words[1]);
+		if(result.affectedRows > 0)	return `Level ${oldCode} has been replaced by level ${words[1]} !`;
+
+		console.error(`Error replacing level in queue`);
+	}
+
 	if(words[0].toLowerCase() === "!open" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
 		 if(!queueIsOpen) {
 		 	queueIsOpen = true;
@@ -149,7 +171,8 @@ module.exports.executeCommand = async function(target, context, words) {
 async function codeExists(code) {
 	var rtnval = false;
 	try {
-		const result = await db.query("SELECT count(*) as total from levels WHERE code = ?", [code]);
+		const result = await db.query("SELECT count(*) as total from levels WHERE code = ?",
+									  [code]);
 		if(result[0].total > 0) {
 			rtnval = true;
 		}
@@ -205,6 +228,27 @@ async function addLevel(code, submitter) {
 	}
 }
 
+async function removeLevel(code) {
+	try {
+		//implement more rows into insert when bookmarks site available
+		const result = await db.query(`DELETE FROM levels WHERE code = ?`,
+									  [code]);
+	} catch (err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function replaceLevel(oldCode, newCode) {
+	try {
+		//implement more rows into insert when bookmarks site available
+		const result = await db.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
+									  [newCode, oldCode]);
+		return result;
+	} catch (err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
 async function getSubmitterID(submitter) {
 	try {
 		const result = await db.query("SELECT id from submitters WHERE name = ?", [submitter]);
@@ -234,6 +278,26 @@ async function numSubmittedBy(submitter, queueType) {
 									    	levels.queue_type = ?`,
 									   [submitter, queueType]);
 		return result[0].count;
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}
+
+async function levelSubmittedBy(submitter) {
+	try {
+		const result = await db.query(`SELECT 
+											code
+									   FROM 
+									    	levels
+									   INNER JOIN 
+									   		submitters
+									   ON
+									   		levels.submitter_id = submitters.id
+									   WHERE 
+									   		submitters.name = ? AND
+									    	levels.queue_type = 1`,
+									   [submitter]);
+		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
