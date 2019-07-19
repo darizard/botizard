@@ -22,8 +22,6 @@ const commands = {
 	replace:modules.QUEUE,
 	challenge:modules.QUEUE,
 	/*
-	wronglevel:modules.QUEUE,
-	putback:modules.QUEUE,
 	list:modules.QUEUE,
 	*/
 	test:modules.INFO,

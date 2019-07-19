@@ -54,7 +54,7 @@ module.exports.executeCommand = async function(target, context, words) {
 		var result = await levelSubmittedBy(context.username);
 		var oldCode;
 
-		if(result == null) return `Nothing in queue to replace!`;
+		if(result == null) return `You have nothing in the queue to replace!`;
 		
 		oldCode = result.code;
 		if(oldCode == words[1])	return `Level ${words[1]} is already in the queue!`;
@@ -138,6 +138,9 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!skip" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel == null) {
+			return `No current level selected!`;
+		}
 		if(await reclassLevel(currentLevel.id, 2)) {
 			var output = `Level ${currentLevel.code} skipped!`;
 			currentLevel = null;
@@ -149,6 +152,9 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!save" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel == null) {
+			return `No current level selected!`;
+		}
 		if(await reclassLevel(currentLevel.id, 3)) {
 			var output = `Level ${currentLevel.code} saved!`;
 			currentLevel = null;
@@ -160,6 +166,9 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!meme" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel == null) {
+			return `No current level selected!`;
+		}
 		if(await reclassLevel(currentLevel.id, 5)) {
 			var output = `Level ${currentLevel.code} memed!`;
 			currentLevel = null;
