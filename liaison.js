@@ -19,8 +19,8 @@ const commands = {
 	skip:modules.QUEUE,
 	save:modules.QUEUE,
 	meme:modules.QUEUE,
-	challenge:modules.QUEUE,
 	replace:modules.QUEUE,
+	challenge:modules.QUEUE,
 	/*
 	wronglevel:modules.QUEUE,
 	putback:modules.QUEUE,

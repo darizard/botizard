@@ -124,6 +124,9 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 
 	if(words[0].toLowerCase() === "!completed" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel == null) {
+			return `No current level selected!`;
+		}
 		if(await reclassLevel(currentLevel.id, 4)) {
 			var output = `Level ${currentLevel.code} completed!`;
 			currentLevel = null;
