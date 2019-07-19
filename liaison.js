@@ -21,9 +21,6 @@ const commands = {
 	meme:modules.QUEUE,
 	replace:modules.QUEUE,
 	challenge:modules.QUEUE,
-	/*
-	list:modules.QUEUE,
-	*/
 	test:modules.INFO,
 	me:modules.INFO,
 	badges:modules.INFO
