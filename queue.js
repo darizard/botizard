@@ -170,7 +170,7 @@ module.exports.executeCommand = async function(target, context, words) {
 			return `No current level selected!`;
 		}
 		if(await reclassLevel(currentLevel.id, 5)) {
-			var output = `Level ${currentLevel.code} memed!`;
+			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username}, you did it.`;
 			currentLevel = null;
 			return output;
 		}
