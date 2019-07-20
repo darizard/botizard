@@ -14,6 +14,8 @@ module.exports.connect = async function(db_name) {
 
 module.exports.executeCommand = async function(target, context, words) {
 
+	//User is submitting a level to the queue
+	//Usage: !add <code>
 	if(words[0].toLowerCase() === "!add") {
 		if(queueIsOpen) {
 			//var levelCodeRegexCombined = new RegExp('^[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}$');
@@ -25,12 +27,11 @@ module.exports.executeCommand = async function(target, context, words) {
 			if(invalidLetter) return "Level codes cannot contain the letters i, o, or z";
 			
 			//if level code already exists, return message
-			if(await codeExists(words[1])) {
+			if(await codeExists(words[1])) 
 				return `${words[1]} was already submitted.`;
-			} 
-			if(await numSubmittedBy(context.username,1) > 0) {
+
+			if(await numSubmittedBy(context.username,1) > 0)
 				return `${context.username} , you already have a level in the queue!`;
-			}
 			
 			//add submitter (if necessary) then add level
 			await addSubmitter(context.username);
@@ -43,6 +44,8 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	//User is replacing an old code in the active queue that they submitted with a new one
+	//Usage: !replace <code> where code is the new level code
 	if(words[0].toLowerCase() === "!replace") {
 		var formatCorrect = levelCodeRegex.test(words[1]);
 		var invalidLetter = invalidLettersRegex.test(words[1]);
@@ -51,20 +54,23 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(!formatCorrect) return "Level code format invalid";
 		if(invalidLetter) return "Level codes cannot contain the letters i, o, or z";
 
+		//ensure viewer has a level in queue
 		var result = await levelSubmittedBy(context.username);
-		var oldCode;
-
 		if(result == null) return `You have nothing in the queue to replace!`;
 		
-		oldCode = result.code;
+		//ensure viewer is submitting a different level
+		var oldCode = result.code;
 		if(oldCode == words[1])	return `Level ${words[1]} is already in the queue!`;
 
+		//replace level in queue
 		result = await replaceLevel(result.code, words[1]);
 		if(result.affectedRows > 0)	return `Level ${oldCode} has been replaced by level ${words[1]} !`;
 
 		console.error(`Error replacing level in queue`);
 	}
 
+	//Open the level queue [mod only command]
+	//Usage: !open
 	if(words[0].toLowerCase() === "!open" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
 		 if(!queueIsOpen) {
 		 	queueIsOpen = true;
@@ -72,6 +78,8 @@ module.exports.executeCommand = async function(target, context, words) {
 		 }
 	}
 
+	//Close the level queue [mod only command]
+	//Usage: !close
 	if(words[0].toLowerCase() === "!close" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
 		if(queueIsOpen) {
 			queueIsOpen = false;
@@ -79,6 +87,8 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	//User is asking for their own position in the queue
+	//Usage: !position
 	if(words[0].toLowerCase() === "!position") {
 		result = await activeQueuePosition(context.username);
 		if(result == null) {
@@ -87,46 +97,47 @@ module.exports.executeCommand = async function(target, context, words) {
 		return `${result.name} is in position ${result.position} with level ${result.code}`;
 	}
 
+	//Move to the next level in the queue [mod only command]
+	//Usage: !next
 	if(words[0].toLowerCase() === "!next" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) {
-			return `Resolve the current level (${currentLevel.code}) first!`;
-		}
+		if(currentLevel != null) return `Resolve the current level (${currentLevel.code}) first!`;
+	
 		var output = await nextLevel(1);
-		if(output == null) {
-			return `No more levels in queue!`;
-		}
+		if(output == null) return `No more levels in queue!`;
+
 		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
+	//Challenge a previously saved level [mod only command]
+	//Usage: !challenge
 	if(words[0].toLowerCase() === "!challenge" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) {
-			return `Resolve the current level ${currentLevel.code} first!`;
-		}
+		if(currentLevel != null) return `Resolve the current level ${currentLevel.code} first!`;
+
 		var output = await nextLevel(3);
-		if(output == null) {
-			return `No saved levels!`;
-		}
+		if(output == null) return `No saved levels!`;
+
 		currentLevel = new Level(output);
 		return `Now challenging ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
+	//Move to a random level in the queue [mod only command]
+	//Usage: !random
 	if(words[0].toLowerCase() === "!random" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) {
-			return `Resolve the current level (${curentLevel.code} first!`;
-		}
+		if(currentLevel != null) return `Resolve the current level (${curentLevel.code} first!`;
+
 		var output = await randomLevel();
-		if(output == null) {
-			return `No more levels in queue!`;
-		}
+		if(output == null) return `No more levels in queue!`;
+
 		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
 	}
 
+	//Mark the current level as completed [mod only command]
+	//Usage: !completed
 	if(words[0].toLowerCase() === "!completed" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) {
-			return `No current level selected!`;
-		}
+		if(currentLevel == null) return `No current level selected!`;
+
 		if(await reclassLevel(currentLevel.id, 4)) {
 			var output = `Level ${currentLevel.code} completed!`;
 			currentLevel = null;
@@ -137,10 +148,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	//Skip (choose not to play) the current level [mod only command]
+	//Usage: !skip
 	if(words[0].toLowerCase() === "!skip" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) {
-			return `No current level selected!`;
-		}
+		if(currentLevel == null) return `No current level selected!`;
+
 		if(await reclassLevel(currentLevel.id, 2)) {
 			var output = `Level ${currentLevel.code} skipped!`;
 			currentLevel = null;
@@ -151,10 +163,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	//Save the current level for a future play [mod only command]
+	//Usage: !save
 	if(words[0].toLowerCase() === "!save" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) {
-			return `No current level selected!`;
-		}
+		if(currentLevel == null) return `No current level selected!`;
+
 		if(await reclassLevel(currentLevel.id, 3)) {
 			var output = `Level ${currentLevel.code} saved!`;
 			currentLevel = null;
@@ -165,10 +178,11 @@ module.exports.executeCommand = async function(target, context, words) {
 		}
 	}
 
+	//Enshrine the current level code as a meme, to be cherished for all time
+	//Usage: !meme
 	if(words[0].toLowerCase() === "!meme" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) {
-			return `No current level selected!`;
-		}
+		if(currentLevel == null) return `No current level selected!`;
+
 		if(await reclassLevel(currentLevel.id, 5)) {
 			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username}, you did it.`;
 			currentLevel = null;
@@ -180,35 +194,24 @@ module.exports.executeCommand = async function(target, context, words) {
 	}
 }
 
+/*
+Takes a level code passed as a string parameter to 
+	check whether it has been submitted at any time
+Returns TRUE if level code exists in the database
+Otherwise, returns FALSE
+*/
 async function codeExists(code) {
-	var rtnval = false;
 	try {
 		const result = await db.query("SELECT count(*) as total from levels WHERE code = ?",
 									  [code]);
-		if(result[0].total > 0) {
-			rtnval = true;
-		}
+		return(result[0].total > 0)
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
-	return rtnval;
 }
 
 async function creatorExists(creator) {
 	//not implemented until Nintendo creates an SMM2 bookmarks site
-}
-
-async function submitterExists(submitter) {
-	var rtnval = false;
-	try {
-		const result = await db.query("SELECT count(*) as total from submitters WHERE name = ?", [submitter]);
-		if(result[0].total > 0) {
-			rtnval = true;
-		}
-	} catch (err) {
-		console.error("An error occurred while querying the DB: " + err);
-	}
-	return rtnval;
 }
 
 /*
@@ -228,7 +231,9 @@ async function addSubmitter(submitter) {
 	}
 	return true;
 }
-
+/*
+Adds a new record to the levels table. 
+*/
 async function addLevel(code, submitter) {
 	var submitter_id = await getSubmitterID(submitter);
 	try {
