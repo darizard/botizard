@@ -8,6 +8,7 @@ const commands = {
 	pls:modules.CHAT,
 	discord:modules.CHAT,
 	so:modules.CHAT,
+	//quote:modules.CHAT,
 
 	add:modules.QUEUE,
 	open:modules.QUEUE,
@@ -21,6 +22,7 @@ const commands = {
 	meme:modules.QUEUE,
 	replace:modules.QUEUE,
 	challenge:modules.QUEUE,
+
 	test:modules.INFO,
 	me:modules.INFO,
 	badges:modules.INFO

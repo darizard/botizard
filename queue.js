@@ -201,6 +201,7 @@ Returns TRUE if level code exists in the database
 Otherwise, returns FALSE
 */
 async function codeExists(code) {
+	code = code.toUpperCase();
 	try {
 		const result = await db.query("SELECT count(*) as total from levels WHERE code = ?",
 									  [code]);
@@ -231,11 +232,13 @@ async function addSubmitter(submitter) {
 	}
 	return true;
 }
+
 /*
 Adds a new record to the levels table. 
 */
 async function addLevel(code, submitter) {
 	var submitter_id = await getSubmitterID(submitter);
+	code = code.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
 		const result = await db.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES (?,?,1,1)`,
@@ -246,6 +249,7 @@ async function addLevel(code, submitter) {
 }
 
 async function removeLevel(code) {
+	code = code.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
 		const result = await db.query(`DELETE FROM levels WHERE code = ?`,
@@ -256,6 +260,8 @@ async function removeLevel(code) {
 }
 
 async function replaceLevel(oldCode, newCode) {
+	oldCode = oldCode.toUpperCase();
+	newCode = newCode.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
 		const result = await db.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
