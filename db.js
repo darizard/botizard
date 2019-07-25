@@ -2,9 +2,11 @@ const util = require('util');
 const mysql = require('mysql');
 const config = require('./resources/connpoolconfig.json');
 
-var pool = mysql.createPool(config);
+module.exports.connect = async function(db_name) {
 
-pool.getConnection((err, connection) => {
+var pool = mysql.createPool(config[db_name]);
+
+await pool.getConnection((err, connection) => {
 	if(err) {
 		console.error("An error occurred while connecting to the database");
 		console.error("Err code: " + err.code);
@@ -12,10 +14,10 @@ pool.getConnection((err, connection) => {
 
 	if(connection) {
 		connection.release();
-		console.log("MySQL Connected");
+		console.log(`MySQL Connected (${db_name})`);
 	}
 	return;
 });
-pool.query = util.promisify(pool.query);
-
-module.exports = pool;
+pool.query = await util.promisify(pool.query);
+return pool;
+}

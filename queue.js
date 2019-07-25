@@ -1,6 +1,7 @@
 const verifier = require('./verifier');
 const Level = require('./level');
-var db;
+var db = require('./db');
+var conn;
 
 const levelCodeRegex = new RegExp('^[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}-[0-9a-zA-Z]{3}$');
 const invalidLettersRegex = new RegExp('[iIoOzZ]');
@@ -9,7 +10,7 @@ var queueIsOpen = false;
 var currentLevel = null;
 
 module.exports.connect = async function(db_name) {
-	db = require(`./${db_name}`);
+	conn = await db.connect(db_name);
 }
 
 module.exports.executeCommand = async function(target, context, words) {
@@ -203,7 +204,7 @@ Otherwise, returns FALSE
 async function codeExists(code) {
 	code = code.toUpperCase();
 	try {
-		const result = await db.query("SELECT count(*) as total from levels WHERE code = ?",
+		const result = await conn.query("SELECT count(*) as total from levels WHERE code = ?",
 									  [code]);
 		return(result[0].total > 0)
 	} catch (err) {
@@ -223,7 +224,7 @@ Returns false if a database error occurred during the INSERT query, and logs an 
 */
 async function addSubmitter(submitter) {
 	try {
-		const result = await db.query(`INSERT INTO submitters (name) VALUES (?)`, [submitter]);
+		const result = await conn.query(`INSERT INTO submitters (name) VALUES (?)`, [submitter]);
 	} catch(err) {
 		if(err.code != "ER_DUP_ENTRY") {
 			console.error("An error occurred while querying the DB: " + err);
@@ -241,7 +242,7 @@ async function addLevel(code, submitter) {
 	code = code.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
-		const result = await db.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES (?,?,1,1)`,
+		const result = await conn.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES (?,?,1,1)`,
 									  [code, submitter_id]);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
@@ -252,7 +253,7 @@ async function removeLevel(code) {
 	code = code.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
-		const result = await db.query(`DELETE FROM levels WHERE code = ?`,
+		const result = await conn.query(`DELETE FROM levels WHERE code = ?`,
 									  [code]);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
@@ -264,7 +265,7 @@ async function replaceLevel(oldCode, newCode) {
 	newCode = newCode.toUpperCase();
 	try {
 		//implement more rows into insert when bookmarks site available
-		const result = await db.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
+		const result = await conn.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
 									  [newCode, oldCode]);
 		return result;
 	} catch (err) {
@@ -274,7 +275,7 @@ async function replaceLevel(oldCode, newCode) {
 
 async function getSubmitterID(submitter) {
 	try {
-		const result = await db.query("SELECT id from submitters WHERE name = ?", [submitter]);
+		const result = await conn.query("SELECT id from submitters WHERE name = ?", [submitter]);
 		if(result[0].id != null ) {
 			return result[0].id;
 		}
@@ -288,7 +289,7 @@ async function getSubmitterID(submitter) {
 
 async function numSubmittedBy(submitter, queueType) {
 	try {
-		const result = await db.query(`SELECT 
+		const result = await conn.query(`SELECT 
 											COUNT(submitter_id) AS count
 									   FROM 
 									    	levels 
@@ -308,7 +309,7 @@ async function numSubmittedBy(submitter, queueType) {
 
 async function levelSubmittedBy(submitter) {
 	try {
-		const result = await db.query(`SELECT 
+		const result = await conn.query(`SELECT 
 											code
 									   FROM 
 									    	levels
@@ -328,7 +329,7 @@ async function levelSubmittedBy(submitter) {
 
 async function activeQueuePosition(submitter) {
 	try {
-		var result = await db.query(`
+		var result = await conn.query(`
 			WITH activeQueue AS
 				(SELECT 
 					ROW_NUMBER() OVER (ORDER BY timestamp ASC, id ASC) position,
@@ -358,7 +359,7 @@ async function activeQueuePosition(submitter) {
 
 async function nextLevel(queueType) {
 	try {
-		var result = await db.query(`
+		var result = await conn.query(`
 			WITH activeQueue AS
 				(SELECT 
 					ROW_NUMBER() OVER (ORDER BY timestamp ASC, id ASC) position,
@@ -389,7 +390,7 @@ async function nextLevel(queueType) {
 
 async function randomLevel() {
 	try {
-		var result = await db.query(`
+		var result = await conn.query(`
 			SELECT
 				COUNT(*) AS count 
 			FROM
@@ -400,7 +401,7 @@ async function randomLevel() {
 		console.log("count value: " + count);
 		var random = Math.floor(Math.random() * count + 1);
 		console.log("random value chosen: " + random);
-		result = await db.query(`
+		result = await conn.query(`
 			WITH activeQueue AS
 				(SELECT 
 					ROW_NUMBER() OVER () position,
@@ -430,7 +431,7 @@ async function randomLevel() {
 
 async function reclassLevel(id, queueType) {
 	try {
-		const result = await db.query(`UPDATE levels SET queue_type = ? WHERE id = ?`, [queueType,id]);
+		const result = await conn.query(`UPDATE levels SET queue_type = ? WHERE id = ?`, [queueType,id]);
 		return result.affectedRows == 1
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);

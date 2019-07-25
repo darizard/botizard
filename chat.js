@@ -1,8 +1,9 @@
 const verifier = require('./verifier');
-var db;
+var db = require('./db');
+var conn;
 
 module.exports.connect = async function(db_name) {
-	db = require(`./${db_name}`);
+	conn = await db.connect(db_name);
 }
 
 module.exports.executeCommand = async function(target, context, words, client) {
@@ -32,7 +33,8 @@ module.exports.executeCommand = async function(target, context, words, client) {
 				var quote = arrayToString(words, 2, words.length);
 				console.log("quote built: " + quote);
 				await addChatter(context.username);
-				await addQuote(quote, conext.username);
+				quote = trimQuotes(quote);
+				await addQuote(quote, context.username);
 			}
 		}
 	}
@@ -47,11 +49,16 @@ function arrayToString(array, start, end) {
 	return output.substring(0,output.length - 1);
 }
 
+function trimQuotes(quoteString) {
+	const quoteInputRegex = new RegExp('[\\d\\w].+[\\d\\w]');
+	return quoteString.match(quoteInputRegex);
+}
+
 async function addQuote(quote, chatter) {
 	try {
 		var chatter_id = await getChatterID(chatter);
 		//implement more rows into insert when bookmarks site available
-		const result = await db.query(`INSERT INTO quotes (quote,chatter_id) VALUES (?,?)`,
+		const result = await conn.query(`INSERT INTO quotes (quote,chatter_id) VALUES (?,?)`,
 									  [quote, chatter_id]);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
@@ -66,7 +73,7 @@ Returns false if a database error occurred during the INSERT query, and logs an 
 */
 async function addChatter(name) {
 	try {
-		const result = await db.query(`INSERT INTO chatters (name) VALUES (?)`, [name]);
+		const result = await conn.query(`INSERT INTO chatters (name) VALUES (?)`, [name]);
 	} catch(err) {
 		if(err.code != "ER_DUP_ENTRY") {
 			console.error("An error occurred while querying the DB: " + err);
@@ -78,7 +85,7 @@ async function addChatter(name) {
 
 async function getChatterID(name) {
 	try {
-		const result = await db.query("SELECT id from chatters WHERE name = ?", [name]);
+		const result = await conn.query("SELECT id from chatters WHERE name = ?", [name]);
 		if(result[0].id != null ) {
 			return result[0].id;
 		}

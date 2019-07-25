@@ -8,7 +8,7 @@ const commands = {
 	pls:modules.CHAT,
 	discord:modules.CHAT,
 	so:modules.CHAT,
-	//quote:modules.CHAT,
+	quote:modules.CHAT,
 
 	add:modules.QUEUE,
 	open:modules.QUEUE,

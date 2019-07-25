@@ -16,11 +16,12 @@ client.on('message', onMessageHandler);
 client.on('connected', onConnectedHandler);
 client.on('disconnected', onDisconnectedHandler);
 
-// Connect to Twitch:
+// Connect to Twitch and MySQL:
 client.connect();
-queue.connect("db");
+queue.connect("viewerlevels");
+chat.connect("chat");
 
-async function onMessageHandler (target, context, msg, self){
+async function onMessageHandler (target, context, msg, self) {
 	if(self) { return } // Ignore messages from the bot
 	if(msg[0] != "!") { return } // Ignore messages not beginning with '!'
 
