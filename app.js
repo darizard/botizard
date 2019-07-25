@@ -30,7 +30,7 @@ async function onMessageHandler (target, context, msg, self) {
 
 	switch(liaison.findModule(words[0])) {
 		case "chat":
-			output = chat.executeCommand(target, context, words, client);
+			output = await chat.executeCommand(target, context, words, client);
 			break;
 		case "queue":
 			output = await queue.executeCommand(target, context, words);
