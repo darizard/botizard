@@ -57,7 +57,11 @@ module.exports.executeCommand = async function(target, context, words) {
 
 		//ensure viewer has a level in queue
 		var result = await levelSubmittedBy(context.username);
-		if(result == null) return `You have nothing in the queue to replace!`;
+		if(result == null || result.queue_type != 1) return `You have nothing in the queue to replace!`;
+
+		//ensure viewer is not replacing the current level
+		if(currentLevel != null && currentLevel.code.toUpperCase() == result.code.toUpperCase()) 
+			return `You cannot replace a level if it is currently being played.`;
 		
 		//ensure viewer is submitting a different level
 		var oldCode = result.code;
@@ -185,7 +189,7 @@ module.exports.executeCommand = async function(target, context, words) {
 		if(currentLevel == null) return `No current level selected!`;
 
 		if(await reclassLevel(currentLevel.id, 5)) {
-			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username}, you did it.`;
+			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username} , you did it.`;
 			currentLevel = null;
 			return output;
 		}
@@ -310,7 +314,8 @@ async function numSubmittedBy(submitter, queueType) {
 async function levelSubmittedBy(submitter) {
 	try {
 		const result = await conn.query(`SELECT 
-											code
+											code,
+											queue_type
 									   FROM 
 									    	levels
 									   INNER JOIN 

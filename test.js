@@ -29,10 +29,10 @@ async function runTest() {
 	var target = "#darizard";
 
 	await client.connect();
-	//await executeCommand(target, modContext, "!quote add \"maybe it's darizard\"", client);
-	//await executeCommand(target, modContext, "!add AAA-AAA-AAA", client);
-	await executeCommand(target, modContext, "!discord", client);
-	//await executeCommand(target, modContext, "!position");
+	//await executeCommand(target, modContext, "!open", client);
+	//await executeCommand(target, modContext, "!add ass-ass-ass", client);
+	//await executeCommand(target, modContext, "!next", client);
+	//await executeCommand(target, modContext, "!meme", client);
 	await client.disconnect();
 
 }
