@@ -1,9 +1,8 @@
 const verifier = require('./verifier');
-var db = require('./db');
-var conn;
+const cq = require('./chatqueries');
 
 module.exports.connect = async function(db_name) {
-	conn = await db.connect(db_name);
+	cq.connect(db_name);
 }
 
 module.exports.executeCommand = async function(target, context, words, client) {
@@ -31,10 +30,9 @@ module.exports.executeCommand = async function(target, context, words, client) {
 		if(words[1].toLowerCase() === "add") {
 			if(words.length > 2) {
 				var quote = arrayToString(words, 2, words.length);
-				console.log("quote built: " + quote);
-				await addChatter(context.username);
-				quote = trimQuotes(quote);
-				await addQuote(quote, context.username);
+				await cq.addChatter(context.username);
+				quote = trimQuote(quote);
+				await cq.addQuote(quote, context.username);
 			}
 		}
 	}
@@ -49,50 +47,7 @@ function arrayToString(array, start, end) {
 	return output.substring(0,output.length - 1);
 }
 
-function trimQuotes(quoteString) {
+function trimQuote(quoteString) {
 	const quoteInputRegex = new RegExp('[\\d\\w].+[\\d\\w]');
 	return quoteString.match(quoteInputRegex);
-}
-
-async function addQuote(quote, chatter) {
-	try {
-		var chatter_id = await getChatterID(chatter);
-		//implement more rows into insert when bookmarks site available
-		const result = await conn.query(`INSERT INTO quotes (quote,chatter_id) VALUES (?,?)`,
-									  [quote, chatter_id]);
-	} catch (err) {
-		console.error("An error occurred while querying the DB: " + err);
-	}
-}
-
-/*
-Adds a new record to the chatters table.
-Returns true if the INSERT query was successful.
-Returns false if a database error occurred during the INSERT query, and logs an error message 
-	to the console if the error was anything but a duplicate entry error
-*/
-async function addChatter(name) {
-	try {
-		const result = await conn.query(`INSERT INTO chatters (name) VALUES (?)`, [name]);
-	} catch(err) {
-		if(err.code != "ER_DUP_ENTRY") {
-			console.error("An error occurred while querying the DB: " + err);
-		}
-		return false;
-	}
-	return true;
-}
-
-async function getChatterID(name) {
-	try {
-		const result = await conn.query("SELECT id from chatters WHERE name = ?", [name]);
-		if(result[0].id != null ) {
-			return result[0].id;
-		}
-		else {
-			return -1;
-		}
-	} catch (err) {
-		console.error("An error occurred while querying the DB: " + err);
-	}
 }
