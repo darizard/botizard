@@ -56,7 +56,7 @@ module.exports.executeCommand = async function(target, context, words) {
 
 		//ensure viewer has a level in queue
 		var result = await qq.levelSubmittedBy(context.username);
-		if(result == null || result.queue_type != 1) return `You have nothing in the queue to replace!`;
+		if(result == null) return `You have nothing in the queue to replace!`;
 
 		//ensure viewer is not replacing the current level
 		if(currentLevel != null && currentLevel.code.toUpperCase() == result.code.toUpperCase()) 

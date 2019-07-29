@@ -88,6 +88,9 @@ module.exports.replaceLevel = async function(oldCode, newCode) {
 	}
 }
 
+/*
+Returns a submitter's ID based on its username
+*/
 module.exports.getSubmitterID = async function(submitter) {
 	try {
 		const result = await conn.query("SELECT id from submitters WHERE name = ?", [submitter]);
@@ -102,6 +105,10 @@ module.exports.getSubmitterID = async function(submitter) {
 	}
 }
 
+/*
+Returns the number of levels that exist in the database given a
+submitter name and a queue type
+*/
 module.exports.numSubmittedBy = async function(submitter, queueType) {
 	try {
 		const result = await conn.query(`SELECT 
@@ -122,11 +129,13 @@ module.exports.numSubmittedBy = async function(submitter, queueType) {
 	}
 }
 
+/*
+Returns the code of a level in the active queue submitted by a given user
+*/
 module.exports.levelSubmittedBy = async function(submitter) {
 	try {
 		const result = await conn.query(`SELECT 
-											code,
-											queue_type
+											code
 									   FROM 
 									    	levels
 									   INNER JOIN 
@@ -143,6 +152,10 @@ module.exports.levelSubmittedBy = async function(submitter) {
 	}
 }
 
+/*
+Returns the level code, user name, and queue position of a level
+submitted by a given user 
+*/
 module.exports.activeQueuePosition = async function(submitter) {
 	try {
 		var result = await conn.query(`
@@ -173,6 +186,9 @@ module.exports.activeQueuePosition = async function(submitter) {
 	}
 }
 
+/*
+Returns the ID, code, and submitter name of the next level in the active queue
+*/
 module.exports.nextLevel = async function(queueType) {
 	try {
 		var result = await conn.query(`
@@ -204,6 +220,9 @@ module.exports.nextLevel = async function(queueType) {
 	}
 }
 
+/*
+Returns the ID, code, and submitter name of a random level in the active queue
+*/
 module.exports.randomLevel = async function() {
 	try {
 		var result = await conn.query(`
@@ -245,6 +264,9 @@ module.exports.randomLevel = async function() {
 	}
 }
 
+/*
+Changes the queue type of a  record in the levels table based on its id
+*/
 module.exports.reclassLevel = async function(id, queueType) {
 	try {
 		const result = await conn.query(`UPDATE levels SET queue_type = ? WHERE id = ?`, [queueType,id]);
