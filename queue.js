@@ -66,6 +66,10 @@ module.exports.executeCommand = async function(target, context, words) {
 		var oldCode = result.code;
 		if(oldCode == words[1])	return `Level ${words[1]} is already in the queue!`;
 
+		//ensure the replacement level was not already submitted in the past
+		if(await qq.codeExists(words[1])) 
+			return `${words[1]} was previously submitted in this channel and cannot be a replacement`;
+
 		//replace level in queue
 		result = await qq.replaceLevel(result.code, words[1]);
 		if(result.affectedRows > 0)	return `Level ${oldCode} has been replaced by level ${words[1]} !`;

@@ -21,24 +21,38 @@ const vipcontext = {"badge-info":null,"badges":{"vip":"1"},"color":"#FF0000","di
 
 // Connect to MySQL:
 queue.connect("viewerlevels_test");
-//chat.connect("chat_test");
+chat.connect("chat_test");
 
 runTest();
 
 async function runTest() {
-	var target = "#darizard";
-
-	await client.connect();
-	await executeCommand(target, modContext, "!open", client);
-	await executeCommand(target, modContext, "!add 555-555-555", client);
-	//await executeCommand(target, modContext, "!so nexus15", client);
-	//await executeCommand(target, modContext, "!replace 222-222-222", client);
-	//await executeCommand(target, modContext, "!discord", client);
-	//await executeCommand(target, modContext, "!add 555-555-555", client);
 	
-	//await executeCommand(target, modContext, "!meme", client);
+	await client.connect();
+	await m("!pls");
+	/*
+	await executeCommand(target, modContext, "!quote", client);
+	await executeCommand(target, modContext, "!quote", client);
+	await executeCommand(target, modContext, "!open", client);
+	await executeCommand(target, modContext, "!add 111-111-111", client);
+	await executeCommand(target, modContext, "!so nexus15", client);
+	await executeCommand(target, modContext, "!replace 222-222-222", client);
+	await executeCommand(target, modContext, "!discord", client);
+	await executeCommand(target, modContext, "!next", client);
+	await executeCommand(target, modContext, "!replace 111-111-111", client);
+	await executeCommand(target, modContext, "!completed", client);
+	await executeCommand(target, modContext, "!add 111-111-111", client);
+	await executeCommand(target, modContext, "!next", client);
+	await executeCommand(target, modContext, "!completed", client);
+	await executeCommand(target, modContext, "!quote add i put on my robe and wizard hat", client);
+	*/
 	await client.disconnect();
 
+}
+
+async function m(msg) {
+	var target = "#darizard";
+
+	await executeCommand(target, modContext, msg, client);
 }
 
 async function executeCommand(target, context, msg, client) {
