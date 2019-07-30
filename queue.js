@@ -19,12 +19,12 @@ module.exports.executeCommand = async function(target, context, words) {
 	if(words[0].toLowerCase() === "!add") {
 		if(queueIsOpen) {
 			//var levelCodeRegexCombined = new RegExp('^[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}-[0-9a-hj-np-yA-HJ-NP-Y]{3}$');
-			var formatCorrect = levelCodeRegex.test(words[1]);
-			var invalidLetter = invalidLettersRegex.test(words[1]);
 
 			//check format, return message if invalid
-			if(!formatCorrect) return "Level code format invalid";
-			if(invalidLetter) return "Level codes cannot contain the letters i, o, or z";
+			if(!levelCodeRegex.test(words[1])) 
+				return "Level code format invalid";
+			if(invalidLettersRegex.test(words[1])) 
+				return "Level codes cannot contain the letters i, o, or z";
 			
 			//if level code already exists, return message
 			if(await qq.codeExists(words[1])) 
@@ -111,10 +111,12 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Move to the next level in the queue [mod only command]
 	//Usage: !next
 	if(words[0].toLowerCase() === "!next" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) return `Resolve the current level (${currentLevel.code}) first!`;
+		if(currentLevel != null) 
+			return `Resolve the current level (${currentLevel.code}) first!`;
 	
 		var output = await qq.nextLevel(1);
-		if(output == null) return `No more levels in queue!`;
+		if(output == null) 
+			return `No more levels in queue!`;
 
 		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
@@ -123,10 +125,12 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Challenge a previously saved level [mod only command]
 	//Usage: !challenge
 	if(words[0].toLowerCase() === "!challenge" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) return `Resolve the current level ${currentLevel.code} first!`;
+		if(currentLevel != null) 
+			return `Resolve the current level ${currentLevel.code} first!`;
 
 		var output = await qq.nextLevel(3);
-		if(output == null) return `No saved levels!`;
+		if(output == null) 
+			return `No saved levels!`;
 
 		currentLevel = new Level(output);
 		return `Now challenging ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
@@ -135,10 +139,12 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Move to a random level in the queue [mod only command]
 	//Usage: !random
 	if(words[0].toLowerCase() === "!random" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel != null) return `Resolve the current level (${curentLevel.code} first!`;
+		if(currentLevel != null) 
+			return `Resolve the current level (${curentLevel.code} first!`;
 
 		var output = await qq.randomLevel();
-		if(output == null) return `No more levels in queue!`;
+		if(output == null) 
+			return `No more levels in queue!`;
 
 		currentLevel = new Level(output);
 		return `The next level is ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
@@ -147,7 +153,8 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Mark the current level as completed [mod only command]
 	//Usage: !completed
 	if(words[0].toLowerCase() === "!completed" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) return `No current level selected!`;
+		if(currentLevel == null) 
+			return `No current level selected!`;
 
 		if(await qq.reclassLevel(currentLevel.id, 4)) {
 			var output = `Level ${currentLevel.code} completed!`;
@@ -162,7 +169,8 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Skip (choose not to play) the current level [mod only command]
 	//Usage: !skip
 	if(words[0].toLowerCase() === "!skip" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) return `No current level selected!`;
+		if(currentLevel == null) 
+			return `No current level selected!`;
 
 		if(await qq.reclassLevel(currentLevel.id, 2)) {
 			var output = `Level ${currentLevel.code} skipped!`;
@@ -177,7 +185,8 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Save the current level for a future play [mod only command]
 	//Usage: !save
 	if(words[0].toLowerCase() === "!save" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) return `No current level selected!`;
+		if(currentLevel == null) 
+			return `No current level selected!`;
 
 		if(await qq.reclassLevel(currentLevel.id, 3)) {
 			var output = `Level ${currentLevel.code} saved!`;
@@ -192,7 +201,8 @@ module.exports.executeCommand = async function(target, context, words) {
 	//Enshrine the current level code as a meme, to be cherished for all time
 	//Usage: !meme
 	if(words[0].toLowerCase() === "!meme" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
-		if(currentLevel == null) return `No current level selected!`;
+		if(currentLevel == null) 
+			return `No current level selected!`;
 
 		if(await qq.reclassLevel(currentLevel.id, 5)) {
 			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username} , you did it.`;
