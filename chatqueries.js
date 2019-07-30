@@ -8,7 +8,8 @@ module.exports.connect = async function(db_name) {
 
 /*
 Adds a new record to the quotes table under the given chatter.
-Returns TRUE if the insert was successful, otherwise returns FALSE
+Returns TRUE if the insert was successful and inserted a single record, 
+	otherwise returns FALSE
 */
 module.exports.addQuote = async function(quote, chatter) {
 	try {
@@ -16,7 +17,7 @@ module.exports.addQuote = async function(quote, chatter) {
 		//implement more rows into insert when bookmarks site available
 		const result = await conn.query(`INSERT INTO quotes (quote,chatter_id) VALUES (?,?)`,
 									  [quote, chatter_id]);
-		return true;
+		return(result.affectedRows == 1);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
 		return false;
@@ -25,13 +26,14 @@ module.exports.addQuote = async function(quote, chatter) {
 
 /*
 Adds a new record to the chatters table.
-Returns TRUE if the insert query was successful, otherwise returns FALSE.
+Returns TRUE if the insert query was successful and inserted a single record,
+	otherwise returns FALSE.
 Logs a message to the console if an error other than a duplicate entry occurs.
 */
 module.exports.addChatter = async function(name) {
 	try {
 		const result = await conn.query(`INSERT INTO chatters (name) VALUES (?)`, [name]);
-		return true;
+		return(result.affectedRows == 1);
 	} catch(err) {
 		if(err.code != "ER_DUP_ENTRY") {
 			console.error("An error occurred while querying the DB: " + err);
@@ -41,8 +43,9 @@ module.exports.addChatter = async function(name) {
 }
 
 /*
-Returns the id of the given chatter based on the chatter's name. If the given
-chatter name does not exist in the database, returns -1.
+Returns the id of the given chatter based on the chatter's name
+Returns -1 if the chatter name does not exist in the chatters table
+Returns undefined if there was an error querying the DB
 */
 module.exports.getChatterID = async function(name) {
 	try {
@@ -55,6 +58,7 @@ module.exports.getChatterID = async function(name) {
 		}
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 

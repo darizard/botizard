@@ -9,17 +9,19 @@ module.exports.connect = async function(db_name) {
 /*
 Takes a level code passed as a string parameter to 
 	check whether it has been submitted at any time
-Returns TRUE if level code exists in the database
-Otherwise, returns FALSE
+Returns TRUE if level code exists in the levels table
+Returns FALSE if the level code does not exist in the levels table
+Returnd undefined if there was an error querying the database
 */
 module.exports.codeExists = async function(code) {
 	code = code.toUpperCase();
 	try {
 		const result = await conn.query("SELECT count(*) as total from levels WHERE code = ?",
 									  [code]);
-		return(result[0].total > 0)
+		return (result[0].total > 0)
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
@@ -29,24 +31,26 @@ module.exports.creatorExists = async function(creator) {
 
 /*
 Adds a new record to the submitters table.
-Returns true if the INSERT query was successful.
-Returns false if a database error occurred during the INSERT query, and logs an error message 
-	to the console if the error was anything but a duplicate entry error
+Returns TRUE if the insert query was successful and affected exactly 1 record, 
+	otherwise returns FALSE.
+Logs an error message to the console if the error was anything but a duplicate entry error
 */
 module.exports.addSubmitter = async function(submitter) {
 	try {
 		const result = await conn.query(`INSERT INTO submitters (name) VALUES (?)`, [submitter]);
+		return (result.affectedRows == 1);
 	} catch(err) {
 		if(err.code != "ER_DUP_ENTRY") {
 			console.error("An error occurred while querying the DB: " + err);
 		}
 		return false;
 	}
-	return true;
 }
 
 /*
-Adds a new record to the levels table. 
+Adds a new record to the levels table.
+Returns TRUE if the insert query was successful and affected exactly 1 record,
+	otherwise returns FALSE.
 */
 module.exports.addLevel = async function(code, submitter) {
 	var submitter_id = await this.getSubmitterID(submitter);
@@ -55,13 +59,17 @@ module.exports.addLevel = async function(code, submitter) {
 		//implement more rows into insert when bookmarks site available
 		const result = await conn.query(`INSERT INTO levels (code,submitter_id,creator_id,queue_type) VALUES (?,?,1,1)`,
 									  [code, submitter_id]);
+		return (result.affectedRows == 1);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return false;
 	}
 }
 
 /*
 Removes a record from the levels table based on its code.
+Returns TRUE if the delete query was successful and affected exactly 1 record,
+	otherwise returns FALSE.
 */
 module.exports.removeLevel = async function(code) {
 	code = code.toUpperCase();
@@ -69,8 +77,10 @@ module.exports.removeLevel = async function(code) {
 		//implement more rows into insert when bookmarks site available
 		const result = await conn.query(`DELETE FROM levels WHERE code = ?`,
 									  [code]);
+		return (result.affectedRows == 1);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return false;
 	}
 }
 
@@ -81,12 +91,13 @@ module.exports.replaceLevel = async function(oldCode, newCode) {
 	oldCode = oldCode.toUpperCase();
 	newCode = newCode.toUpperCase();
 	try {
-		//implement more rows into insert when bookmarks site available
+		//implement more columns into insert when bookmarks site available
 		const result = await conn.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
 									  [newCode, oldCode]);
 		return result;
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
@@ -96,7 +107,7 @@ Returns a submitter's ID based on its username
 module.exports.getSubmitterID = async function(submitter) {
 	try {
 		const result = await conn.query("SELECT id from submitters WHERE name = ?", [submitter]);
-		if(result[0].id != null ) {
+		if(result[0].id != null) {
 			return result[0].id;
 		}
 		else {
@@ -104,12 +115,14 @@ module.exports.getSubmitterID = async function(submitter) {
 		}
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
 Returns the number of levels that exist in the database given a
-submitter name and a queue type
+	submitter name and a queue type. Returns undefined if an error
+	occurred during query
 */
 module.exports.numSubmittedBy = async function(submitter, queueType) {
 	try {
@@ -128,11 +141,13 @@ module.exports.numSubmittedBy = async function(submitter, queueType) {
 		return result[0].count;
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
-Returns the code of a level in the active queue submitted by a given user
+Returns the code of a level in the active queue submitted by a given user.
+Returns undefined if a query error occurred.
 */
 module.exports.levelSubmittedBy = async function(submitter) {
 	try {
@@ -151,12 +166,13 @@ module.exports.levelSubmittedBy = async function(submitter) {
 		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
 Returns the level code, user name, and queue position of a level
-submitted by a given user 
+	submitted by a given user. Returns undefined if a query error occurred.
 */
 module.exports.activeQueuePosition = async function(submitter) {
 	try {
@@ -185,11 +201,13 @@ module.exports.activeQueuePosition = async function(submitter) {
 		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
-Returns the ID, code, and submitter name of the next level in the active queue
+Returns the ID, code, and submitter name of the next level in the active queue.
+	Returns undefined if a query error occurred.
 */
 module.exports.nextLevel = async function(queueType) {
 	try {
@@ -219,11 +237,13 @@ module.exports.nextLevel = async function(queueType) {
 		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
-Returns the ID, code, and submitter name of a random level in the active queue
+Returns the ID, code, and submitter name of a random level in the active queue.
+	Returns undefined if a query error occurred.
 */
 module.exports.randomLevel = async function() {
 	try {
@@ -261,17 +281,21 @@ module.exports.randomLevel = async function() {
 		return result[0];
 	} catch(err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
 
 /*
-Changes the queue type of a  record in the levels table based on its id
+Changes the queue type of a record in the levels table based on its id.
+Returns TRUE if the query was successful and updated exactly 1 record.
+Returns undefined if a query error occurred.
 */
 module.exports.reclassLevel = async function(id, queueType) {
 	try {
 		const result = await conn.query(`UPDATE levels SET queue_type = ? WHERE id = ?`, [queueType,id]);
-		return result.affectedRows == 1
+		return (result.affectedRows == 1);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
 	}
 }
