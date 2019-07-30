@@ -52,3 +52,43 @@ module.exports.getChatterID = async function(name) {
 		console.error("An error occurred while querying the DB: " + err);
 	}
 }
+
+/*
+Returns a random quote from the quotes table, the name of the chatter who submitted it,
+and the timestamp from when the quote was added.
+*/
+module.exports.randomQuote = async function() {
+	try {
+		var result = await conn.query(`
+			SELECT
+				COUNT(*) AS count 
+			FROM
+				quotes`);
+		var count = result[0].count;
+		var random = Math.floor(Math.random() * count + 1);
+		result = await conn.query(`
+			WITH quotesTable AS
+				(SELECT 
+					ROW_NUMBER() OVER () rowNum,
+					quote,
+					chatter_id,
+					timestamp
+				FROM
+					quotes)
+			SELECT
+				quotesTable.quote,
+				quotesTable.timestamp,
+				chatters.name as chatter,
+				quotesTable.rowNum
+			FROM
+				quotesTable,
+				chatters
+			WHERE
+				quotesTable.chatter_id = chatters.id AND
+				quotesTable.rowNum = ?`,
+			[random]);
+		return result[0];
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+	}
+}

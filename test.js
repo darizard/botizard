@@ -29,12 +29,12 @@ async function runTest() {
 	var target = "#darizard";
 
 	await client.connect();
-	await executeCommand(target, modContext, "!quote add who did that", client);
-	await executeCommand(target, modContext, "!pls", client);
-	await executeCommand(target, modContext, "!so nexus15", client);
+	await executeCommand(target, modContext, "!quote", client);
+	//await executeCommand(target, modContext, "!pls", client);
+	//await executeCommand(target, modContext, "!so nexus15", client);
 	//await executeCommand(target, modContext, "!replace 222-222-222", client);
-	await executeCommand(target, modContext, "!discord", client);
-	await executeCommand(target, modContext, "!add 555-555-555", client);
+	//await executeCommand(target, modContext, "!discord", client);
+	//await executeCommand(target, modContext, "!add 555-555-555", client);
 	
 	//await executeCommand(target, modContext, "!meme", client);
 	await client.disconnect();

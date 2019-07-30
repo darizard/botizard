@@ -27,7 +27,12 @@ module.exports.executeCommand = async function(target, context, words, client) {
 	}
 
 	if(words[0].toLowerCase() === "!quote") {
-		if(words[1].toLowerCase() === "add") {
+		if(words.length < 2) {
+			result = await cq.randomQuote();
+			//TODO: cq.randomQuote() returns a timestamp as part of result. Parse it and include its date in the output message.
+			return  `Quote #${result.rowNum}: "${result.quote}", submitted by ${result.chatter}`;
+		}
+		else if(words[1].toLowerCase() === "add") {
 			if(words.length > 2) {
 				var quote = arrayToString(words, 2, words.length);
 				await cq.addChatter(context.username);
@@ -48,6 +53,6 @@ function arrayToString(array, start, end) {
 }
 
 function trimQuote(quoteString) {
-	const quoteInputRegex = new RegExp('[\\d\\w].+[\\d\\w]');
+	const quoteInputRegex = new RegExp('[^\'\"\`].+[^\'\"\`"]');
 	return quoteString.match(quoteInputRegex);
 }

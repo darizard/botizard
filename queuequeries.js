@@ -233,9 +233,7 @@ module.exports.randomLevel = async function() {
 			WHERE
 				queue_type = 1`);
 		var count = result[0].count;
-		console.log("count value: " + count);
 		var random = Math.floor(Math.random() * count + 1);
-		console.log("random value chosen: " + random);
 		result = await conn.query(`
 			WITH activeQueue AS
 				(SELECT 
