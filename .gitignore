@@ -1,3 +1,10 @@
+# Files containing credentials
+connpoolconfig.json
+twitchcreds.json
+
+# SQL dumps of project-related databases
+sql_dumps/
+
 # Logs
 logs
 *.log
