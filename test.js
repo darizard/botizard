@@ -29,8 +29,12 @@ async function runTest() {
 	
 	await client.connect();
 	await m("!pls");
+	await m("!quote");
+	await m("!open");
+	await m("!add 333-333-333");
+	await m("!next");
+	await m("!skip");
 	/*
-	await executeCommand(target, modContext, "!quote", client);
 	await executeCommand(target, modContext, "!quote", client);
 	await executeCommand(target, modContext, "!open", client);
 	await executeCommand(target, modContext, "!add 111-111-111", client);

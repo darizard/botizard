@@ -1,4 +1,4 @@
-const DBConnPool = require('./db');
+const DBConnPool = require('./dbconnpool');
 var conn;
 
 module.exports.connect = async function(db_name) {
