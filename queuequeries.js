@@ -86,6 +86,8 @@ module.exports.removeLevel = async function(code) {
 
 /*
 Changes a level code in the levels table.
+Returns TRUE if the update query was successful and affected exactly 1 record,
+	otherwise returns FALSE.
 */
 module.exports.replaceLevel = async function(oldCode, newCode) {
 	oldCode = oldCode.toUpperCase();
@@ -94,15 +96,17 @@ module.exports.replaceLevel = async function(oldCode, newCode) {
 		//implement more columns into insert when bookmarks site available
 		const result = await conn.query(`UPDATE levels SET code = ?, creator_id = 1 WHERE code = ?`,
 									  [newCode, oldCode]);
-		return result;
+		return (result.affectedRows == 1);
 	} catch (err) {
 		console.error("An error occurred while querying the DB: " + err);
-		return undefined;
+		return false;
 	}
 }
 
 /*
-Returns a submitter's ID based on its username
+Returns a submitter's ID based on its username. Returns -1 if the name
+	was not found in the submitters table, or undefined if there
+	was an error querying the database
 */
 module.exports.getSubmitterID = async function(submitter) {
 	try {
