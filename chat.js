@@ -30,15 +30,22 @@ module.exports.executeCommand = async function(target, context, words, client) {
 		if(words.length < 2) {
 			result = await cq.randomQuote();
 			//TODO: cq.randomQuote() returns a timestamp as part of result. Parse it and include its date in the output message.
-			return  `Quote #${result.rowNum}: "${result.quote}", submitted by ${result.chatter}`;
-		}
-		else if(words[1].toLowerCase() === "add") {
-			if(words.length > 2) {
-				var quote = arrayToString(words, 2, words.length);
-				await cq.addChatter(context.username);
-				quote = trimQuote(quote);
-				await cq.addQuote(quote, context.username);
+			if(result != undefined) {
+				return  `Quote #${result.rowNum}: "${result.quote}", submitted by ${result.chatter}`;
+			} else {
+				return `Error retrieving quote`;
 			}
+		}
+		else if(words[1].toLowerCase() === "add" && words.length > 2) {
+			var quote = arrayToString(words, 2, words.length);
+			await cq.addChatter(context.username);
+			quote = trimQuote(quote);
+			if(await cq.addQuote(quote, context.username)) {
+				return `Quote successfully added -> \"${quote}\"`;
+			} else {
+				return `Error adding quote`;
+			}
+
 		}
 	}
 }
