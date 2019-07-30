@@ -21,7 +21,7 @@ const vipcontext = {"badge-info":null,"badges":{"vip":"1"},"color":"#FF0000","di
 
 // Connect to MySQL:
 queue.connect("viewerlevels_test");
-chat.connect("chat_test");
+//chat.connect("chat_test");
 
 runTest();
 
@@ -29,8 +29,8 @@ async function runTest() {
 	var target = "#darizard";
 
 	await client.connect();
-	await executeCommand(target, modContext, "!quote", client);
-	//await executeCommand(target, modContext, "!pls", client);
+	await executeCommand(target, modContext, "!open", client);
+	await executeCommand(target, modContext, "!add 555-555-555", client);
 	//await executeCommand(target, modContext, "!so nexus15", client);
 	//await executeCommand(target, modContext, "!replace 222-222-222", client);
 	//await executeCommand(target, modContext, "!discord", client);
