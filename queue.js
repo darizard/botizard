@@ -35,10 +35,12 @@ module.exports.executeCommand = async function(target, context, words) {
 			
 			//add submitter (if necessary) then add level
 			await qq.addSubmitter(context.username);
-			await qq.addLevel(words[1], context.username);
-			
+			if(await qq.addLevel(words[1], context.username)) {
+				return `Level ${words[1]} has been submitted by ${context.username} !`;
+			} else {
+				return `Error submitting level`;
+			}
 			//Implement when bookmarks site available: check whether level creator exists, and add to DB if it doesn't
-			return `Level ${words[1]} has been submitted by ${context.username} !`;
 		} else { //Level queue is not open
 			return "The queue is currently closed";
 		}
@@ -47,16 +49,16 @@ module.exports.executeCommand = async function(target, context, words) {
 	//User is replacing an old code in the active queue that they submitted with a new one
 	//Usage: !replace <code> where code is the new level code
 	if(words[0].toLowerCase() === "!replace") {
-		var formatCorrect = levelCodeRegex.test(words[1]);
-		var invalidLetter = invalidLettersRegex.test(words[1]);
-
 		//check format, return message if invalid
-		if(!formatCorrect) return "Level code format invalid";
-		if(invalidLetter) return "Level codes cannot contain the letters i, o, or z";
+		if(!levelCodeRegex.test(words[1])) 
+			return "Level code format invalid";
+		if(invalidLettersRegex.test(words[1])) 
+			return "Level codes cannot contain the letters i, o, or z";
 
 		//ensure viewer has a level in queue
 		var result = await qq.levelSubmittedBy(context.username);
-		if(result == null) return `You have nothing in the queue to replace!`;
+		if(result == null)
+			return `You have nothing in the queue to replace!`;
 
 		//ensure viewer is not replacing the current level
 		if(currentLevel != null && currentLevel.code.toUpperCase() == result.code.toUpperCase()) 
@@ -64,15 +66,16 @@ module.exports.executeCommand = async function(target, context, words) {
 		
 		//ensure viewer is submitting a different level
 		var oldCode = result.code;
-		if(oldCode == words[1])	return `Level ${words[1]} is already in the queue!`;
+		if(oldCode == words[1])
+			return `Level ${words[1]} is already in the queue!`;
 
 		//ensure the replacement level was not already submitted in the past
 		if(await qq.codeExists(words[1])) 
 			return `${words[1]} was previously submitted in this channel and cannot be a replacement`;
 
 		//replace level in queue
-		result = await qq.replaceLevel(result.code, words[1]);
-		if(result.affectedRows > 0)	return `Level ${oldCode} has been replaced by level ${words[1]} !`;
+		if(await qq.replaceLevel(result.code, words[1]))
+			return `Level ${oldCode} has been replaced by level ${words[1]} !`;
 
 		console.error(`Error replacing level in queue`);
 	}
