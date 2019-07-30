@@ -18,7 +18,7 @@ class DBConnPool {
 
 			if(connection) {
 				connection.release();
-				console.log(`MySQL Connected (${this.db_name})`);
+				console.log(`MySQL connection pool established (${this.db_name})`);
 			}
 			return;
 		});
