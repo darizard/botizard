@@ -213,4 +213,17 @@ module.exports.executeCommand = async function(target, context, words) {
 			console.error("!meme command did not execute successfully");
 		}
 	}
+
+	/*Identify the current level an invalid level code and remove it from the database
+	Usage: !invalid
+	*/
+	if(words[0].toLowerCase() === "!invalid" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+		if(currentLevel == null)
+			return `No current level selected!`;
+
+		if(await qq.removeLevel(currentLevel.code))
+			return `Invalid level code ${currentLevel.code} has been removed from the queue`;
+		
+		return `Error removing invalid level`;
+	}
 }

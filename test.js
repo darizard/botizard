@@ -28,17 +28,17 @@ runTest();
 async function runTest() {
 	
 	await client.connect();
-	/*
+	
 	await m("!pls");
-	await m("!quote add i'm a giant furry");
+	await m("!quote");
 	await m("!open");
-	await m("!add 333-333-333");
+	await m("!add 555-555-555");
 	await m("!next");
-	await m("!skip");
-	*/
-
+	await m("!invalid");
+	await m("!quote");
+	await m("!position");
+	
 	await client.disconnect();
-
 }
 
 async function m(msg) {

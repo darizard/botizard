@@ -20,6 +20,7 @@ const commands = {
 	skip:modules.QUEUE,
 	save:modules.QUEUE,
 	meme:modules.QUEUE,
+	invalid:modules.QUEUE,
 	replace:modules.QUEUE,
 	challenge:modules.QUEUE,
 
