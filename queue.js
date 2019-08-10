@@ -108,6 +108,22 @@ module.exports.executeCommand = async function(target, context, words) {
 		return `${result.name} is in position ${result.position} with level ${result.code}`;
 	}
 
+	//User wants to view the queue
+	//Usage: !list or !queue
+	if(words[0].toLowerCase() === "!queue" || words[0].toLowerCase() === "!list") {
+		result = await qq.getLevels();
+		if(result[0] == null) {
+			return `No levels are currently in the queue!`;
+		} else {
+			var displayListSize = result.length < 3 ? result.length.toString() : "3";
+			var output = `Currently ${result.length} level(s) in queue. The next ${displayListSize} people in queue are: `;
+			for(var i = 0; i < result.length; i++) {
+				output += `${result[i].submitter}, `;
+			}
+			return output.substring(0,output.length - 2);
+		}
+	}	
+
 	//Move to the next level in the queue [mod only command]
 	//Usage: !next
 	if(words[0].toLowerCase() === "!next" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {

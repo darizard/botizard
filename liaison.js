@@ -14,6 +14,8 @@ const commands = {
 	open:modules.QUEUE,
 	close:modules.QUEUE,
 	position:modules.QUEUE,
+	list:modules.QUEUE,
+	queue:modules.QUEUE,
 	next:modules.QUEUE,
 	random:modules.QUEUE,
 	completed:modules.QUEUE,

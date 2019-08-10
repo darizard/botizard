@@ -303,3 +303,36 @@ module.exports.reclassLevel = async function(id, queueType) {
 		return undefined;
 	}
 }
+
+/*
+Returns a given number of records from the levels table which are
+	currently in the active queue.
+	Returns undefined if a query error occurred.
+*/
+module.exports.getLevels = async function(numLevels = Number.MAX_SAFE_INTEGER) {
+	try {
+		var result = await conn.query(`
+			WITH activeQueue AS
+				(SELECT 
+					ROW_NUMBER() OVER (ORDER BY timestamp ASC, id ASC) position,
+                    levels.*
+				FROM
+					levels
+				WHERE
+					queue_type = 1)
+			SELECT
+				activeQueue.*,
+				submitters.name as submitter
+			FROM
+				activeQueue,
+				submitters
+			WHERE
+				activeQueue.submitter_id = submitters.id AND
+				activeQueue.position <= ?`,
+				[numLevels]);
+		return result;
+	} catch(err) {
+		console.error("An error occurred while querying the DB: " + err);
+		return undefined;
+	}
+}
