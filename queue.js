@@ -140,7 +140,7 @@ module.exports.executeCommand = async function(target, context, words) {
 
 	//Challenge a previously saved level [mod only command]
 	//Usage: !challenge
-	if(words[0].toLowerCase() === "!challenge" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
+	if(words[0].toLowerCase() === "!load" && (verifier.isMod(context) || verifier.isBroadcaster(context))) {
 		if(currentLevel != null) 
 			return `Resolve the current level ${currentLevel.code} first!`;
 
@@ -149,7 +149,7 @@ module.exports.executeCommand = async function(target, context, words) {
 			return `No saved levels!`;
 
 		currentLevel = new Level(output);
-		return `Now challenging ${currentLevel.code}, submitted by ${currentLevel.submitter} !`;
+		return `Now loading ${currentLevel.code} from saved levels, submitted by ${currentLevel.submitter} !`;
 	}
 
 	//Move to a random level in the queue [mod only command]

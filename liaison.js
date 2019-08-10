@@ -24,7 +24,7 @@ const commands = {
 	meme:modules.QUEUE,
 	invalid:modules.QUEUE,
 	replace:modules.QUEUE,
-	challenge:modules.QUEUE,
+	load:modules.QUEUE,
 
 	test:modules.INFO,
 	me:modules.INFO,

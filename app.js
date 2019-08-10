@@ -19,7 +19,7 @@ client.on('disconnected', onDisconnectedHandler);
 // Connect to Twitch and MySQL:
 client.connect();
 queue.connect("viewerlevels");
-//chat.connect("chat");
+chat.connect("chat");
 
 async function onMessageHandler (target, context, msg, self) {
 	if(self) { return } // Ignore messages from the bot
