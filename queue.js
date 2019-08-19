@@ -221,7 +221,7 @@ module.exports.executeCommand = async function(target, context, words) {
 			return `No current level selected!`;
 
 		if(await qq.reclassLevel(currentLevel.id, 5)) {
-			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${context.username} , you did it.`;
+			var output = `${currentLevel.code} has been enshrined as a meme. Congratulations, ${currentLevel.submitter} , you did it.`;
 			currentLevel = null;
 			return output;
 		}
