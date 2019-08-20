@@ -11,7 +11,7 @@ module.exports.executeCommand = async function(target, context, words, client) {
 	}
 
 	if(words[0].toLowerCase() === "!discord"){
-		return "Why not join our Discord? https://discord.gg/qW2aafm";
+		return "I've got a Discord server! All are welcome. https://discord.gg/qW2aafm";
 	}
 
 	if(words[0].toLowerCase() === "!so") {
