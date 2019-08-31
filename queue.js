@@ -238,8 +238,9 @@ module.exports.executeCommand = async function(target, context, words) {
 			return `No current level selected!`;
 
 		if(await qq.removeLevel(currentLevel.code)) {
+			var invalidCode = currentLevel.code;
 			currentLevel = null;
-			return `Invalid level code ${currentLevel.code} has been removed from the queue`;
+			return `Invalid level code ${invalidCode} has been removed from the queue`;
 		}
 		
 		return `Error removing invalid level`;
