@@ -10,12 +10,12 @@ module.exports.executeCommand = async function(target, context, words, client) {
 		return "RareChar RareChar RareChar RareChar RareChar";
 	}
 
-	if(words[0].toLowerCase() === "!charity"){
-		return "Charity Message";
-	}
-
 	if(words[0].toLowerCase() === "!discord"){
 		return "I've got a Discord server! All are welcome. https://discord.gg/qW2aafm";
+	}
+
+	if(words[0].toLowerCase() === "!charity"){
+		return "Welcome to my Extra Life 2019 stream! Please consider supporting the event with your kind donation HERE: bit.ly/336W2uP Any amount helps!";
 	}
 
 	if(words[0].toLowerCase() === "!so") {

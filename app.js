@@ -21,7 +21,7 @@ client.connect();
 queue.connect("viewerlevels");
 chat.connect("chat");
 
-var charityInverval = 20 * 60 * 1000;
+var charityInterval = 20 * 60 * 1000; //20 (min) * 60 (sec) * 1000 (ms)
 setTimeout(pingCharity, charityInterval);
 
 async function onMessageHandler (target, context, msg, self) {
@@ -56,7 +56,7 @@ function sendMessage (target, context, message) {
 }
 
 async function pingCharity() {
-	client.say("#darizard","Charity Message");
+	client.say("#darizard","Welcome to my Extra Life 2019 stream! Please consider supporting the event with your kind donation HERE: bit.ly/336W2uP Any amount helps!");
 	setTimeout(pingCharity, charityInterval);
 }
 
