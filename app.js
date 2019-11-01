@@ -21,6 +21,9 @@ client.connect();
 queue.connect("viewerlevels");
 chat.connect("chat");
 
+var charityInverval = 20 * 60 * 1000;
+setTimeout(pingCharity, charityInterval);
+
 async function onMessageHandler (target, context, msg, self) {
 	if(self) { return } // Ignore messages from the bot
 	if(msg[0] != "!") { return } // Ignore messages not beginning with '!'
@@ -50,6 +53,11 @@ function sendMessage (target, context, message) {
 	} else {
 		client.say(target, message)
 	}
+}
+
+async function pingCharity() {
+	client.say("#darizard","Charity Message");
+	setTimeout(pingCharity, charityInterval);
 }
 
 //When connecting to Twitch chat:

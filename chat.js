@@ -10,6 +10,10 @@ module.exports.executeCommand = async function(target, context, words, client) {
 		return "RareChar RareChar RareChar RareChar RareChar";
 	}
 
+	if(words[0].toLowerCase() === "!charity"){
+		return "Charity Message";
+	}
+
 	if(words[0].toLowerCase() === "!discord"){
 		return "I've got a Discord server! All are welcome. https://discord.gg/qW2aafm";
 	}

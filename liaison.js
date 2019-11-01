@@ -9,6 +9,7 @@ const commands = {
 	discord:modules.CHAT,
 	so:modules.CHAT,
 	quote:modules.CHAT,
+	charity:modules.CHAT,
 
 	add:modules.QUEUE,
 	open:modules.QUEUE,
