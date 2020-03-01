@@ -18,32 +18,40 @@ client.on('disconnected', onDisconnectedHandler);
 
 // Connect to Twitch and MySQL:
 client.connect();
-queue.connect("viewerlevels");
+//queue.connect("viewerlevels");
 chat.connect("chat");
 
-var charityInterval = 20 * 60 * 1000; //20 (min) * 60 (sec) * 1000 (ms)
-setTimeout(pingCharity, charityInterval);
+var discordInitialInterval = 15 * 60 * 1000;
+var discordInterval = 45 * 60 * 1000; //45 (min) * 60 (sec) * 1000 (ms)
+setTimeout(pingDiscord, discordInitialInterval);
 
 async function onMessageHandler (target, context, msg, self) {
 	if(self) { return } // Ignore messages from the bot
-	if(msg[0] != "!") { return } // Ignore messages not beginning with '!'
-
+	
 	var words = msg.split(/[ ,]+/);
 	var output = "";
 
-	switch(liaison.findModule(words[0])) {
-		case "chat":
-			output = await chat.executeCommand(target, context, words, client);
-			break;
-		case "queue":
-			output = await queue.executeCommand(target, context, words);
-			break;
-		case "info":
-			output = info.executeCommand(target, context, words);
-			break;
+	if(msg[0] == "!") { //run appropriate command
+		switch(liaison.findModule(words[0])) {
+			case "chat":
+				output = await chat.executeCommand(target, context, words, client);
+				break;
+			case "info":
+				output = info.executeCommand(target, context, words);
+				break;
+	//		case "queue":
+	//			output = await queue.executeCommand(target, context, words);
+	//			break;
+	//		case "mod":
+	//			output = mod.executeCommand(target, context, words, client);
+	//			break;
+		}
+	} else { //scan and deal with message accordingly
+		output = await chat.scanMessage(target, context, words, client);
 	}
-
 	if(output) sendMessage(target, context, output);
+
+
 }
 
 //Helper function sends messages
@@ -55,9 +63,9 @@ function sendMessage (target, context, message) {
 	}
 }
 
-async function pingCharity() {
-	client.say("#darizard","Welcome to my Extra Life 2019 stream! Please consider supporting the event with your kind donation HERE: bit.ly/336W2uP Any amount helps!");
-	setTimeout(pingCharity, charityInterval);
+async function pingDiscord() {
+	client.say("#darizard","Discord: https://discord.gg/qW2aafm");
+	setTimeout(pingDiscord, discordInterval);
 }
 
 //When connecting to Twitch chat:

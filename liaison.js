@@ -1,7 +1,8 @@
 const modules = {
 	CHAT: 'chat',
 	QUEUE: 'queue',
-	INFO: 'info'
+	INFO: 'info',
+	MOD: 'mod'
 }
 
 const commands = {
@@ -9,7 +10,9 @@ const commands = {
 	discord:modules.CHAT,
 	so:modules.CHAT,
 	quote:modules.CHAT,
-	charity:modules.CHAT,
+
+	title:modules.MOD,
+	game:modules.MOD,
 
 	add:modules.QUEUE,
 	open:modules.QUEUE,
@@ -33,5 +36,6 @@ const commands = {
 }
 
 module.exports.findModule = function(cmd) {
+	cmd = cmd.toLowerCase();
 	return commands[cmd.substring(1,cmd.length)];
 }

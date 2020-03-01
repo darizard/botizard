@@ -1,3 +1,14 @@
+const superUsers = [
+	"NeXuS15"
+]
+
+module.exports.isSuperUser = function(userContext) {
+	for(const u of superUsers) {
+		if(userContext.username == u) return true;
+	}
+	return false;
+}
+
 module.exports.isMod = function(userContext) {
 	return(userContext.mod);
 }

@@ -1,5 +1,6 @@
 const verifier = require('./verifier');
 const cq = require('./chatqueries');
+const bl = require('./blacklist');
 
 module.exports.connect = async function(db_name) {
 	cq.connect(db_name);
@@ -8,17 +9,13 @@ module.exports.connect = async function(db_name) {
 module.exports.executeCommand = async function(target, context, words, client) {
 	if(words[0].toLowerCase() === "!pls"){
 		return "RareChar RareChar RareChar RareChar RareChar";
+	} 
+
+	else if(words[0].toLowerCase() === "!discord"){
+		return "Discord: https://discord.gg/qW2aafm";
 	}
 
-	if(words[0].toLowerCase() === "!discord"){
-		return "I've got a Discord server! All are welcome. https://discord.gg/qW2aafm";
-	}
-
-	if(words[0].toLowerCase() === "!charity"){
-		return "Welcome to my Extra Life 2019 stream! Please consider supporting the event with your kind donation HERE: bit.ly/336W2uP Any amount helps!";
-	}
-
-	if(words[0].toLowerCase() === "!so") {
+	else if(words[0].toLowerCase() === "!so" && words.length > 1) {
 		if(words[1].charAt(0) === '@') {
 			words[1] = words[1].substring(1, words[1].length);
 		}
@@ -30,7 +27,7 @@ module.exports.executeCommand = async function(target, context, words, client) {
 			return "Shoutout to " + words[1] + "! Please check them out and give them a follow at https://www.twitch.tv/" + words[1];
 	}
 
-	if(words[0].toLowerCase() === "!quote") {
+	else if(words[0].toLowerCase() === "!quote") {
 		if(words.length < 2) {
 			result = await cq.randomQuote();
 			//TODO: cq.randomQuote() returns a timestamp as part of result. Parse it and include its date in the output message.
@@ -52,6 +49,15 @@ module.exports.executeCommand = async function(target, context, words, client) {
 
 		}
 	}
+}
+
+module.exports.scanMessage = async function(target, context, words, client) {
+	output = null;
+	if(!verifier.isMod(context) && !verifier.isBroadcaster(context)) {
+		output = bl.moderate(target,context,words,client);
+	}
+
+	return output;
 }
 
 function arrayToString(array, start, end) {
