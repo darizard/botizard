@@ -15,6 +15,10 @@ module.exports.executeCommand = async function(target, context, words, client) {
 		return "Discord: https://discord.gg/qW2aafm";
 	}
 
+	else if(words[0].toLowerCase() === "!multi"){
+		return "Multitwitch link: multitwitch.tv/darizard/mindfirepsion";
+	}
+
 	else if(words[0].toLowerCase() === "!so" && words.length > 1) {
 		if(words[1].charAt(0) === '@') {
 			words[1] = words[1].substring(1, words[1].length);

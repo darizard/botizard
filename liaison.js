@@ -10,6 +10,7 @@ const commands = {
 	discord:modules.CHAT,
 	so:modules.CHAT,
 	quote:modules.CHAT,
+	multi:modules.CHAT,
 
 	title:modules.MOD,
 	game:modules.MOD,
