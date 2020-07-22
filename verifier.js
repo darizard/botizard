@@ -1,20 +1,16 @@
 const superUsers = [
-	"NeXuS15"
+	"nexus15",
+	"mega_scott"
 ]
 
-module.exports.isSuperUser = function(userContext) {
-	for(const u of superUsers) {
-		if(userContext.username == u) return true;
-	}
-	return false;
+module.exports.isBroadcaster = function(userContext) {
+	return(userHasBadge(userContext,"broadcaster"));
 }
 
 module.exports.isMod = function(userContext) {
 	return(userContext.mod);
-}
-
-module.exports.isBroadcaster = function(userContext) {
-	return(userHasBadge(userContext,"broadcaster"));
+	if(isBroadcaster(userContext)) return true;
+	if(isSuperUser(userContext)) return true;
 }
 
 module.exports.isVIP = function(userContext) {
@@ -23,6 +19,13 @@ module.exports.isVIP = function(userContext) {
 
 module.exports.isSub = function(userContext) {
 	return(userHasBadge(userContext,"subscriber"));
+}
+
+function isSuperUser(userContext) {
+	for(const u of superUsers) {
+		if(userContext.username == u) return true;
+	}
+	return false;
 }
 
 function userHasBadge(userContext, badgeName) {

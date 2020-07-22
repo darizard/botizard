@@ -1,32 +1,31 @@
 //twitch API libray
 const twitch = require('tmi.js');
 
+//botizard credentials file
+const twitchcreds = require('./resources/twitchcreds.json');
+
+//establish twitch client
+var client = new twitch.client(twitchcreds);
+
 //chatbot modules
 var liaison = require('./liaison');
 var chat = require('./chat');
-var queue = require('./queue');
 var info = require('./info');
-
-//json credentials file for connecting to twitch
-const twitchcreds = require('./resources/twitchcreds.json');
-
-let client = new twitch.client(twitchcreds);
 
 client.on('message', onMessageHandler);
 client.on('connected', onConnectedHandler);
 client.on('disconnected', onDisconnectedHandler);
 
-// Connect to Twitch and MySQL:
+//connect to Twitch [and MySQL]:
 client.connect();
-//queue.connect("viewerlevels");
-chat.connect("chat");
+//chat.connect("chat");
 
 var discordInitialInterval = 15 * 60 * 1000;
 var discordInterval = 45 * 60 * 1000; //45 (min) * 60 (sec) * 1000 (ms)
 setTimeout(pingDiscord, discordInitialInterval);
 
 async function onMessageHandler (target, context, msg, self) {
-	if(self) { return } // Ignore messages from the bot
+	if(self) { return } //Ignore messages from the bot
 	
 	var words = msg.split(/[ ,]+/);
 	var output = "";
@@ -37,21 +36,16 @@ async function onMessageHandler (target, context, msg, self) {
 				output = await chat.executeCommand(target, context, words, client);
 				break;
 			case "info":
-				output = info.executeCommand(target, context, words);
+				output = await info.executeCommand(target, context, words);
 				break;
-	//		case "queue":
-	//			output = await queue.executeCommand(target, context, words);
-	//			break;
-	//		case "mod":
-	//			output = mod.executeCommand(target, context, words, client);
-	//			break;
+			//case "mod":
+			//	output = await mod.executeCommand(target, context, words, client);
+			//	break;
 		}
 	} else { //scan and deal with message accordingly
 		output = await chat.scanMessage(target, context, words, client);
 	}
 	if(output) sendMessage(target, context, output);
-
-
 }
 
 //Helper function sends messages
